@@ -10,6 +10,9 @@ migratedown:
 
 sqlc: 
 	sqlc generate
+
+test: 
+	go test -v -cover ./...
 dropdb: 
 	docker exec -it postgres16 dropdb simple_bank
 
