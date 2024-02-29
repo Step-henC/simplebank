@@ -14,6 +14,22 @@ jobs:
   test:
     name: Test
     runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        # Docker Hub image
+        image: postgres:16
+        # Provide the password for postgres
+        env:
+          POSTGRES_USER: root
+          POSTGRES_PASSWORD: password
+          POSTGRES_DB: simple_bank
+        # Set health checks to wait until postgres has started need it for tests to pass
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
     steps:
   
 
@@ -24,6 +40,9 @@ jobs:
     
     - name: Check out code into Go module directory
       uses: actions/checkout@v2
+
+    - name: Run Migrations
+      run: make migrateup #define schema for db
 
     - name: Test
       run: make test
