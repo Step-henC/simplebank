@@ -41,6 +41,14 @@ jobs:
     - name: Check out code into Go module directory
       uses: actions/checkout@v2
 
+        # need to install migrate cli from github so this image can use migrate command
+        # mv the migrate into usr/bin. found filename by running command locally
+    - name: Install Migrate CLI
+      run: | 
+        curl -L https://github.com/golang-migrate/migrate/releases/download/v4.17.0/migrate.darwin-amd64.tar.gz | tar xvz
+        sudo mv migrate /usr/bin/
+        which migrate
+
     - name: Run Migrations
       run: make migrateup #define schema for db
 
