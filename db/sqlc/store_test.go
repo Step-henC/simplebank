@@ -124,6 +124,7 @@ func TestTransferTxDeadlock(t *testing.T) {
 		fromAccountID := account1.ID
 		toAccountID := account2.ID
 
+		//swap accounts transferring vs account being transferred
 		if i%2 == 1 {
 			fromAccountID = account2.ID
 			toAccountID = account1.ID

@@ -100,26 +100,41 @@ func (store *Store) TransferTx(ctx context.Context, arg TransferTxParams) (Trans
 
 		//get account -> update its balance :need proper locking mechanism
 
-		result.FromAccount, err = q.AddAccountBalance(ctx, AddAccountBalanceParams{
-			ID:     arg.FromAccountID,
-			Amount: -arg.Amount,
-		})
+		if arg.FromAccountID < arg.ToAccountID { //perform tx in same order ea time to avoid db deadlock
 
-		if err != nil {
-			return err
+			result.FromAccount, result.ToAccount, err = addMoney(ctx, q, arg.FromAccountID, -arg.Amount, arg.ToAccountID, arg.Amount)
+
+		} else {
+			result.ToAccount, result.FromAccount, err = addMoney(ctx, q, arg.ToAccountID, arg.Amount, arg.FromAccountID, -arg.Amount)
 		}
-
-		result.ToAccount, err = q.AddAccountBalance(ctx, AddAccountBalanceParams{
-			ID:     arg.ToAccountID,
-			Amount: arg.Amount,
-		})
-
-		if err != nil {
-			return err
-		}
-
 		return nil
 	})
 
 	return result, err
+}
+
+// refactor function to avoid long code of swapping order of accounts trying to avoid db deadlock
+func addMoney(
+	ctx context.Context,
+	q *Queries,
+	accountID1 int64, //first account id
+	amount1 int64, // money transferred out
+	accountID2 int64, // second account id
+	amount2 int64, //money transferred in
+
+) (account1 Account, account2 Account, err error) {
+	account1, err = q.AddAccountBalance(ctx, AddAccountBalanceParams{
+		ID:     accountID1,
+		Amount: amount1,
+	})
+	if err != nil {
+		return //acts the same as adding accounts cool syntax feature of go
+	}
+
+	account2, err = q.AddAccountBalance(ctx, AddAccountBalanceParams{
+		ID:     accountID2,
+		Amount: amount2,
+	})
+
+	return
 }
