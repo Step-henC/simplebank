@@ -11,9 +11,11 @@ migratedown:
 sqlc: 
 	sqlc generate
 
+psqlcli:
+	docker exec -it postgres16 psql -U root -d simple_bank
 test: 
 	go test -v -cover ./...
 dropdb: 
 	docker exec -it postgres16 dropdb simple_bank
 
-.PHONY: postgres dropdb createdb migrateup migratedown sqlc
+.PHONY: postgres dropdb createdb migrateup migratedown sqlc psqlcli
