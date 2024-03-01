@@ -18,4 +18,7 @@ test:
 dropdb: 
 	docker exec -it postgres16 dropdb simple_bank
 
-.PHONY: postgres dropdb createdb migrateup migratedown sqlc psqlcli
+server:
+	go run main.go
+
+.PHONY: postgres dropdb createdb migrateup migratedown sqlc psqlcli server
