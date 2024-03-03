@@ -6,11 +6,12 @@ import (
 )
 
 type Server struct {
-	store  *db.Store //interact with db processing req from clients
+	store db.Store //interact with db processing req from clients
+	//removed pointers since its and interface now for mockgen
 	router *gin.Engine
 }
 
-func NewServer(store *db.Store) *Server {
+func NewServer(store db.Store) *Server {
 	server := &Server{store: store}
 	router := gin.Default()
 

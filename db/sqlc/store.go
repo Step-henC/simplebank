@@ -10,13 +10,24 @@ import (
 // queries struct does not operate on multiple tables at once
 // for every bank transaction we have to operate on all three tables
 // this way is "composition" and is preferred way in golang to extend store functionality vs "inheritance"
-type Store struct {
+// type Store struct {
+// 	*Queries //all queries are available to us now
+// 	db       *sql.DB
+// }
+
+// converted store to interface and sqlstore to allow db mocking w/ mockgen
+type Store interface {
+	Querier //interface generated from sqlc yaml (emit_interface) to access all query functions in mockgen
+	TransferTx(ctx context.Context, arg TransferTxParams) (TransferTxResult, error)
+}
+
+type SQLStore struct {
 	*Queries //all queries are available to us now
 	db       *sql.DB
 }
 
-func NewStore(db *sql.DB) *Store {
-	return &Store{
+func NewStore(db *sql.DB) Store {
+	return &SQLStore{
 		db:      db,
 		Queries: New(db),
 	}
@@ -24,7 +35,7 @@ func NewStore(db *sql.DB) *Store {
 
 // executes a function within db transaction
 // do not want outer packages to call it
-func (store *Store) execTx(ctx context.Context, fn func(*Queries) error) error {
+func (store *SQLStore) execTx(ctx context.Context, fn func(*Queries) error) error {
 
 	tx, err := store.db.BeginTx(ctx, nil) //nil usually is sql.TxOption to set isolation level
 
@@ -64,7 +75,7 @@ type TransferTxResult struct {
 }
 
 // creates transfer record, adds account entries and update accounts' balances within single db tx
-func (store *Store) TransferTx(ctx context.Context, arg TransferTxParams) (TransferTxResult, error) {
+func (store *SQLStore) TransferTx(ctx context.Context, arg TransferTxParams) (TransferTxResult, error) {
 
 	var result TransferTxResult
 
