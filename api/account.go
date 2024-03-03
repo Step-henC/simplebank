@@ -9,8 +9,11 @@ import (
 )
 
 type createAccountRequest struct {
-	Owner    string `json:"owner" binding:"required"` //gin includes json validation with binding and oneof
-	Currency string `json:"currency" binding:"required,oneof=USD EUR"`
+	Owner string `json:"owner" binding:"required"` //gin includes json validation with binding and oneof
+	//Currency string `json:"currency" binding:"required,oneof=USD EUR"`
+	Currency string `json:"currency" binding:"required,currency"` //replaced one of with custom validation in utils and registered
+	//to gin's validation engine in server.go
+
 }
 
 func (server *Server) createAccount(ctx *gin.Context) {
